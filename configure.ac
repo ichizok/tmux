@@ -315,6 +315,27 @@ if test "x$found_b64_ntop" = xno; then
 		AC_MSG_RESULT(no)
 	fi
 fi
+if test "x$found_b64_ntop" = xno; then
+	AC_MSG_RESULT(no)
+
+	AC_MSG_CHECKING(for b64_ntop with -lnetwork)
+	OLD_LIBS="$LIBS"
+	LIBS="$LIBS -lnetwork"
+	AC_TRY_LINK(
+		[
+			#include <sys/types.h>
+			#include <netinet/in.h>
+			#include <resolv.h>
+		],
+		[b64_ntop(NULL, 0, NULL, 0);],
+		found_b64_ntop=yes,
+		found_b64_ntop=no
+	)
+	if test "x$found_b64_ntop" = xno; then
+		LIBS="$OLD_LIBS"
+		AC_MSG_RESULT(no)
+	fi
+fi
 if test "x$found_b64_ntop" = xyes; then
 	AC_DEFINE(HAVE_B64_NTOP)
 	AC_MSG_RESULT(yes)
@@ -324,7 +345,7 @@ fi
 
 # Look for networking libraries.
 AC_SEARCH_LIBS(inet_ntoa, nsl)
-AC_SEARCH_LIBS(socket, socket)
+AC_SEARCH_LIBS(socket, [socket network])
 AC_CHECK_LIB(xnet, socket)
 
 # Check for CMSG_DATA. Some platforms require _XOPEN_SOURCE_EXTENDED (for
@@ -443,7 +464,7 @@ if test "x$found_fdforkpty" = xyes; then
 else
 	AC_LIBOBJ(fdforkpty)
 fi
-AC_SEARCH_LIBS(forkpty, util, found_forkpty=yes, found_forkpty=no)
+AC_SEARCH_LIBS(forkpty, [util bsd], found_forkpty=yes, found_forkpty=no)
 if test "x$found_forkpty" = xyes; then
 	AC_DEFINE(HAVE_FORKPTY)
 fi
@@ -603,6 +624,10 @@ case "$host_os" in
 		AC_MSG_RESULT(cygwin)
 		PLATFORM=cygwin
 		;;
+	*haiku*)
+		AC_MSG_RESULT(haiku)
+		PLATFORM=haiku
+		;;
 	*)
 		AC_MSG_RESULT(unknown)
 		PLATFORM=unknown
@@ -618,6 +643,7 @@ AM_CONDITIONAL(IS_NETBSD, test "x$PLATFORM" = xnetbsd)
 AM_CONDITIONAL(IS_OPENBSD, test "x$PLATFORM" = xopenbsd)
 AM_CONDITIONAL(IS_SUNOS, test "x$PLATFORM" = xsunos)
 AM_CONDITIONAL(IS_HPUX, test "x$PLATFORM" = xhpux)
+AM_CONDITIONAL(IS_HAIKU, test "x$PLATFORM" = xhaiku)
 AM_CONDITIONAL(IS_UNKNOWN, test "x$PLATFORM" = xunknown)
 
 # Save our CFLAGS/CPPFLAGS/LDFLAGS for the Makefile and restore the old user

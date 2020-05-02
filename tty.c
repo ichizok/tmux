@@ -16,6 +16,7 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <sys/termios.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
@@ -78,6 +79,10 @@ static void	tty_default_attributes(struct tty *, const struct grid_cell *,
 #define TTY_BLOCK_INTERVAL (100000 /* 100 milliseconds */)
 #define TTY_BLOCK_START(tty) (1 + ((tty)->sx * (tty)->sy) * 8)
 #define TTY_BLOCK_STOP(tty) (1 + ((tty)->sx * (tty)->sy) / 8)
+
+#ifndef IMAXBEL
+# define IMAXBEL 0
+#endif
 
 void
 tty_create_log(void)
